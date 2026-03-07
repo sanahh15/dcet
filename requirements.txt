@@ -5,3 +5,4 @@ Flask-Dance
 Werkzeug
 requests
 gunicorn
+Authlib
