@@ -1,0 +1,60 @@
+{% extends "instructor_layout.html" %}
+
+{% block title %}Announcement Posted{% endblock %}
+
+{% block content %}
+
+<style>
+    .confirmation {
+        text-align: center;
+        padding: 50px;
+    }
+    
+    h2 {
+        color: #28a745;
+        font-size: 28px;
+    }
+    
+    p {
+        color: #555;
+        font-size: 16px;
+        margin: 20px 0;
+    }
+    
+    .btn {
+        display: inline-block;
+        padding: 15px 25px;
+        margin: 15px;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: bold;
+    }
+    
+    .btn:hover {
+        background-color: #0056b3;
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #5a6268;
+    }
+</style>
+
+<div class="confirmation">
+    <h2>✅ Announcement Posted Successfully!</h2>
+    
+    <p><strong>Title:</strong> {{ title }}</p>
+    <p>Your announcement has been posted and is visible to all students.</p>
+    
+    <div>
+        <a href="/instructor/add_announcement" class="btn">📢 Post Another Announcement</a>
+        <a href="/instructor_dashboard" class="btn btn-secondary">🏠 Back to Dashboard</a>
+    </div>
+</div>
+
+{% endblock %}

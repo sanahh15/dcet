@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DCET Study Portal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<header class="navbar">
+    <div class="logo-area">
+        <img src="{{ url_for('static', filename='images/dcet_logo.png') }}" class="logo">
+        <span>DCET Study Portal</span>
+    </div>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/login">Login</a>
+        <a href="/login">Login</a>
+    </nav>
+</header>
+
+{% block content %}{% endblock %}
+
+</body>
+</html>

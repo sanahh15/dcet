@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Examination Results</title>
+
+<!-- ====== STYLES ====== -->
+<style>
+:root {
+    --navy: #000080;
+    --success: #10b981;
+    --fail: #ef4444;
+    --glass: rgba(255, 255, 255, 0.95);
+}
+
+body {
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    flex-direction: column;
+}
+
+/* Result Card */
+.result-card {
+    background: var(--glass);
+    width: 100%;
+    max-width: 450px;
+    padding: 40px 30px;
+    border-radius: 24px;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    margin-bottom: 50px;
+}
+
+.header-icon {
+    font-size: 3rem;
+    margin-bottom: 10px;
+}
+
+h2 {
+    color: var(--navy);
+    margin: 0 0 10px 0;
+    font-size: 1.8rem;
+    letter-spacing: -0.5px;
+}
+
+.score-container {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    margin: 30px auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    background: white;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+    border: 8px solid #e2e8f0;
+}
+
+.score-container.pass { border-color: var(--success); }
+.score-container.fail { border-color: var(--fail); }
+
+.score-num {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: #1e293b;
+    line-height: 1;
+}
+
+.score-total {
+    font-size: 1.1rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.badge {
+    display: inline-block;
+    padding: 10px 24px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 25px;
+}
+
+.badge.pass { background: #d1fae5; color: #065f46; }
+.badge.fail { background: #fee2e2; color: #991b1b; }
+
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 30px;
+    text-align: left;
+}
+
+.detail-item {
+    background: #f8fafc;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #f1f5f9;
+}
+
+.detail-label { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; }
+.detail-value { font-size: 1rem; color: #334155; font-weight: 600; }
+
+.back-btn {
+    display: block;
+    width: 100%;
+    background: var(--navy);
+    color: white;
+    padding: 18px;
+    border-radius: 14px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 128, 0.2);
+    margin-bottom: 50px;
+}
+
+.back-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 128, 0.3);
+    background: #000066;
+}
+
+/* Certificate Card */
+.certificate-card {
+    background: linear-gradient(to right, #fefefe, #e0e7ff);
+    border: 3px solid #4f46e5;
+    border-radius: 15px;
+    padding: 40px 30px;
+    text-align: center;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    position: relative;
+    max-width: 600px;
+    width: 100%;
+}
+
+.certificate-card h1 { font-size: 32px; font-weight: 700; color: #4f46e5; margin-bottom: 10px; }
+.certificate-card h2 { font-size: 24px; font-weight: 600; margin: 15px 0; }
+.certificate-card p { color: #374151; font-size: 16px; margin-bottom: 25px; }
+
+.signature-section {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 40px;
+    padding: 0 50px;
+}
+
+.signature-section div { text-align: center; }
+.signature-section div p { font-size: 14px; color: #4b5563; margin-top: 5px; }
+
+#downloadCert {
+    margin-top: 30px;
+    padding: 12px 25px;
+    background: #4f46e5;
+    color: white;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#downloadCert:hover { background: #3730a3; }
+
+@media (max-width: 480px) {
+    .result-card { padding: 30px 20px; }
+    .score-num { font-size: 2.8rem; }
+    .score-container { width: 150px; height: 150px; }
+    .certificate-card { padding: 30px 20px; }
+    .signature-section { flex-direction: column; gap: 20px; padding: 0; }
+}
+</style>
+</head>
+
+<body>
+
+{% set percent = (score / total * 100) | int %}
+{% set is_pass = percent >= 40 %}
+
+<!-- Result Card -->
+<div class="result-card">
+    <div class="header-icon">{{ '🎉' if is_pass else '✍️' }}</div>
+    <h2>Performance Report</h2>
+    <p style="color: #64748b; margin-bottom: 0;">Test submitted successfully</p>
+
+    <div class="score-container {{ 'pass' if is_pass else 'fail' }}">
+        <span class="score-num">{{ score }}</span>
+        <span class="score-total">/ {{ total }}</span>
+    </div>
+
+    <div class="badge {{ 'pass' if is_pass else 'fail' }}">
+        {{ 'Passed' if is_pass else 'Needs Review' }} • {{ percent }}%
+    </div>
+
+    <div class="details-grid">
+        <div class="detail-item">
+            <div class="detail-label">Subject</div>
+            <div class="detail-value">{{ subject if subject else 'General' }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Status</div>
+            <div class="detail-value">{{ 'Qualified' if is_pass else 'Unqualified' }}</div>
+        </div>
+    </div>
+
+    <a href="/student_dashboard" class="back-btn">Go to Dashboard</a>
+</div>
+
+<!-- Certificate -->
+<!-- Certificate -->
+<div class="certificate-card" id="certificate">
+    <h1>Certificate of Completion</h1>
+    <p>This is to certify that</p>
+
+    <!-- Student Name -->
+    <h2>🎓 {{ student_name }}</h2>
+
+    <p>
+        has successfully completed the 
+        <strong>{{ subject }}</strong> test 
+        with a score of 
+        <strong>{{ score }}/{{ total }}</strong>.
+    </p>
+
+    <!-- Signature Section -->
+    <div class="signature-section">
+        <div>
+            <!-- Line for Instructor -->
+            <div style="border-top: 2px solid #4f46e5; width: 160px; margin: 0 auto;"></div>
+            <!-- Name above line -->
+            <p style="margin-top:5px; font-weight:600;">{{ instructor_name }}</p>
+            <p style="font-size:12px; color:#4b5563;">Instructor sign</p>
+        </div>
+        <div>
+            <!-- Line for Date -->
+            <div style="border-top: 2px solid #4f46e5; width: 160px; margin: 0 auto;"></div>
+            <!-- Date above line -->
+            <p style="margin-top:5px; font-weight:600;">{{ test_date }}</p>
+            <p style="font-size:12px; color:#4b5563;">Date</p>
+        </div>
+    </div>
+
+    <button id="downloadCert">📄 Download Certificate</button>
+</div>
+
+<!-- JS for PDF Download -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+document.getElementById("downloadCert").addEventListener("click", () => {
+    const cert = document.getElementById("certificate");
+
+    html2canvas(cert, { scale: 2 }).then((canvas) => {
+        const imgData = canvas.toDataURL("image/png");
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+            orientation: "landscape",
+            unit: "px",
+            format: [canvas.width, canvas.height]
+        });
+
+        pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
+        pdf.save("Certificate_{{ subject }}.pdf");
+    });
+});
+</script>
+
+</body>
+</html>

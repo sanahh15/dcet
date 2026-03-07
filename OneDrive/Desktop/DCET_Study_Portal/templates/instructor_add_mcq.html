@@ -1,0 +1,89 @@
+{% extends "instructor_layout.html" %}
+
+{% block title %}Add MCQ{% endblock %}
+
+{% block content %}
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    /* Page Title */
+    h2 {
+        text-align: center;
+        margin-bottom: 40px;
+        font-size: 32px;
+        letter-spacing: 1px;
+        color: #151719;
+    }
+
+    /* Main Form Card */
+    form {
+        max-width: 900px;
+        margin: auto;
+        background: white;
+        color: #040b10;
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+    }
+
+    label {
+        display: block;
+        font-weight: 600;
+        margin-top: 10px;
+    }
+
+    input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+    }
+
+    /* Submit Button */
+    button[type="submit"] {
+        display: block;
+        width: 100%;
+        background: linear-gradient(to right, #28a745, #218838);
+        color: white;
+        padding: 15px;
+        border: none;
+        border-radius: 10px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 30px;
+    }
+
+    button[type="submit"]:hover {
+        background: linear-gradient(to right, #218838, #1e7e34);
+    }
+</style>
+
+<h2>Add MCQ - {{subject}}</h2>
+
+<form method="POST">
+
+<label>Question</label>
+<input type="text" name="question"><br><br>
+
+<label>Option 1</label>
+<input type="text" name="option1"><br><br>
+
+<label>Option 2</label>
+<input type="text" name="option2"><br><br>
+
+<label>Option 3</label>
+<input type="text" name="option3"><br><br>
+
+<label>Option 4</label>
+<input type="text" name="option4"><br><br>
+
+<label>Correct Answer</label>
+<input type="text" name="answer"><br><br>
+
+<button type="submit">Add MCQ</button>
+
+</form>
+
+{% endblock %}

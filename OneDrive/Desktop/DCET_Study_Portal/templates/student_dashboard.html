@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Dashboard</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+ <style>
+
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg,#ba93e8,#dd92f8);
+    min-height: 100vh;
+}
+
+/* HEADER */
+.header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:20px 40px;
+    background:rgba(255,255,255,0.15);
+    backdrop-filter:blur(12px);
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+}
+
+.header h1 {
+    margin:0;
+    font-size:26px;
+    color:#fff;
+    font-weight:600;
+}
+
+/* Logout button */
+.logout-btn {
+    text-decoration:none;
+    background:#ff4b5c;
+    color:#fff;
+    padding:10px 22px;
+    border-radius:25px;
+    font-size:14px;
+    transition:0.3s;
+}
+
+.logout-btn:hover {
+    background:#e63946;
+    transform:translateY(-2px);
+}
+
+/* SEARCH BOX */
+#searchInput{
+    width:320px;
+    padding:12px 18px;
+    border-radius:30px;
+    border:none;
+    font-size:14px;
+    outline:none;
+    box-shadow:0 6px 14px rgba(0,0,0,0.15);
+}
+
+/* SECTION TITLE */
+.section-title {
+    text-align:center;
+    color:#fff;
+    margin-top:35px;
+    font-size:22px;
+    font-weight:600;
+}
+
+/* SUBJECT CARDS */
+ .card-container {
+    display: flex;/* ❗ PREVENT NEW LINE */
+    gap: 20px;
+    padding: 40px;
+    justify-content: center;
+    overflow-x: auto;   
+     flex-wrap: wrap;        /* safety */
+}
+/* CARD */
+.card {
+    position:relative;
+    background:#ffffff;
+    min-width:240px;
+    min-height:110px;
+    border-radius:12px;
+    padding:20px 20px 20px 25px;
+    font-weight:500;
+    font-size:15px;
+    color:#1f2937;
+    border:1px solid #e5e7eb;
+    box-shadow:0 6px 14px rgba(0,0,0,0.08);
+    cursor:pointer;
+    transition:all 0.25s ease;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+}
+
+/* Accent strip */
+.card::before {
+    content:"";
+    position:absolute;
+    left:0;
+    top:0;
+    width:6px;
+    height:100%;
+    background:linear-gradient(to bottom,#6a11cb,#2575fc);
+    border-radius:6px 0 0 6px;
+}
+
+.card:hover {
+    transform:translateY(-6px);
+    box-shadow:0 14px 28px rgba(0,0,0,0.18);
+}
+
+.card h3 {
+    margin:0 0 8px;
+    font-size:16px;
+    font-weight:600;
+    color:#1f2937;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.card p {
+    margin:0;
+    font-size:14px;
+    color:#6b7280;
+}
+
+/* Search animation */
+.card {
+    transition:opacity 0.3s ease, transform 0.3s ease;
+}
+
+.card.hide {
+    opacity:0;
+    transform:scale(0.95);
+    pointer-events:none;
+}
+
+/* ANNOUNCEMENT */
+.announcement {
+    max-width:450px;
+    margin:30px auto 60px;
+    background:#ffffff;
+    border-radius:18px;
+    padding:25px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.15);
+    text-align:center;
+}
+
+.announcement h3 {
+    margin-top:0;
+    color:#333;
+}
+
+.announcement p {
+    color:#555;
+    font-size:15px;
+}
+
+/* TEST SUBJECT CARDS */
+.subjects-container {
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:20px;
+    margin-top:20px;
+}
+
+.subjects-container a {
+    display:block;
+    text-align:center;
+    width:220px;
+    padding:22px 18px;
+    background:#4f46e5;
+    color:white;
+    font-size:17px;
+    font-weight:600;
+    text-decoration:none;
+    border-radius:12px;
+    box-shadow:0 8px 18px rgba(0,0,0,0.15);
+    transition:all 0.3s ease;
+}
+
+.subjects-container a:hover {
+    background:#3730a3;
+    transform:translateY(-5px);
+}
+
+/* FOOTER */
+footer {
+    text-align:center;
+    padding:15px;
+    background:rgba(255,255,255,0.2);
+    color:#fff;
+    font-size:14px;
+}
+
+/* RESPONSIVE */
+@media (max-width:768px){
+
+.card-container{
+    padding:25px;
+}
+
+#searchInput{
+    width:80%;
+}
+
+.subjects-container a{
+    width:80%;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- SEARCH -->
+<div style="text-align:center; margin:20px 0;">
+    <input 
+        type="text" 
+        id="searchInput" 
+        placeholder="Search subjects..."
+        style="width:300px;padding:12px 20px;border-radius:25px;border:none;font-size:14px;outline:none;"
+    >
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("searchInput");
+    const cards = document.getElementsByClassName("card");
+
+    searchInput.addEventListener("keyup", function () {
+        let filter = this.value.toLowerCase();
+        for (let i = 0; i < cards.length; i++) {
+            let text = cards[i].innerText.toLowerCase();
+            if (text.includes(filter)) {
+                cards[i].classList.remove("hide");
+                cards[i].style.display = "flex";
+            } else {
+                cards[i].classList.add("hide");
+                setTimeout(() => {
+                    if (cards[i].classList.contains("hide")) {
+                        cards[i].style.display = "none";
+                    }
+                }, 300);
+            }
+        }
+    });
+});
+</script>
+
+<!-- HEADER -->
+<div class="header">
+    <h1>Welcome, {{ student_name }}</h1>
+    <a href="/student_logout" class="logout-btn">Logout</a>
+</div>
+
+<div class="section-title">Your Subjects</div>
+
+<div class="card-container">
+    {% for subject in subjects %}
+    <div class="card" onclick="location.href='/student/subject/{{ subject.id }}'">
+        <h3>{{ subject.name }}</h3>
+        <p>Click to view study materials</p>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="section-title">Exam Date Announcement</div>
+
+<div class="announcement">
+    <h3>📢 DCET Exam Notification</h3>
+    <p><strong>Expected Date:</strong> May 23, 2026</p>
+    <a href="https://cetonline.karnataka.gov.in/kea/" target="_blank">Official DCET Website</a>
+</div>
+
+    <div>
+        <style>
+/* Container */
+.subjects-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* Subject cards */
+.subjects-container a {
+    display: block;
+    text-align: center;
+    width: 220px;
+    padding: 25px 20px;
+    background: #007bff; /* Blue color */
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+}
+
+/* Hover effect */
+.subjects-container a:hover {
+    background: #0056b3; /* Darker blue */
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.2);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .subjects-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .subjects-container a {
+        width: 80%;
+        margin-bottom: 15px;
+    }
+}
+</style>
+     <h2 style="text-align:center;">Select Subject to Take Test</h2>
+    <div class="subjects-container">
+    <a href="/student/test/engineering_mathematics">Engineering Mathematics</a>
+    <a href="/student/test/statistics_analytics">Statistics & Analytics</a>
+    <a href="/student/test/it_skills">IT Skills</a>
+    <a href="/student/test/feee">FEEE</a>
+    <a href="/student/test/pms">PMS</a>
+</div>
+</div>
+</div>
+<footer>
+    © 2024 DCET Study Portal. All rights reserved.
+</footer>
+
+</body>
+</html>

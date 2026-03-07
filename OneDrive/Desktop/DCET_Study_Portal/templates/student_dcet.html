@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ material.title }}</title>
+    
+    <style>
+        body { font-family: Arial,'Poppins', sans-serif; margin: 0; }
+        .container { display: flex; height: 100vh; }
+        .left, .right { padding: 20px; overflow-y: auto; }
+        .left { width: 30%; background-color: #f0f0f0; border-right: 1px solid #ccc; }
+        .right { width: 70%; }
+        h2 { margin-top: 0; }
+        a { text-decoration: none; color: blue; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left">
+            <h3>Practice / Notes</h3>
+            <ul>
+                <li><a href="#">Note 1</a></li>
+                <li><a href="#">Note 2</a></li>
+            </ul>
+        </div>
+        <div class="right">
+            <h2>{{ material.title }}</h2>
+            <h3>Question:</h3>
+            <p>{{ material.question }}</p>
+
+            {% if material.answer %}
+            <h3>Answer:</h3>
+            <p>{{ material.answer }}</p>
+            {% endif %}
+
+            {% if material.qp_file %}
+            <h3>Question Paper:</h3>
+            <a href="{{ url_for('static', filename='uploads/' ~ material.qp_file.split('/')[-1]) }}" target="_blank">Open PDF</a>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
