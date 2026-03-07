@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add DCET Material - {{ subject.name }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #1f4fa3;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        header h1 {
+            color: #333;
+            margin: 0;
+        }
+
+        .back-btn {
+            background-color: #1f4fa3;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .back-btn:hover {
+            background-color: #163b7a;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: bold;
+            color: #333;
+            margin-top: 15px;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        textarea,
+        input[type="file"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background-color: #388E3C;
+        }
+
+        .hint {
+            color: #666;
+            font-size: 12px;
+            margin-top: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Add DCET C-20 Material</h1>
+            <a href="/admin/subject/{{ subject.id }}/materials" class="back-btn">← Back</a>
+        </header>
+
+        <h3>Subject: {{ subject.name }}</h3>
+
+        <form method="POST" enctype="multipart/form-data">
+            <label for="title">📌 Material Title:</label>
+            <input type="text" id="title" name="title" placeholder="e.g., Unit 1 - Fundamentals" required>
+            <div class="hint">Give a descriptive title for the study material</div>
+
+            <label for="question">❓ Question / Topic Description:</label>
+            <textarea id="question" name="question" placeholder="Enter the question or topic description..." required></textarea>
+            <div class="hint">Paste the question or explain the topic in detail</div>
+
+            <label for="answer">✅ Answer / Solution / Explanation:</label>
+            <textarea id="answer" name="answer" placeholder="Enter the answer, solution, or detailed explanation..."></textarea>
+            <div class="hint">Provide the complete answer with explanations (optional)</div>
+
+            <label for="qp_file">📄 Upload Question Paper (PDF) [Optional]:</label>
+            <input type="file" id="qp_file" name="qp_file" accept=".pdf,.txt">
+            <div class="hint">Upload additional files like question papers, notes, or reference materials</div>
+
+            <button type="submit">✨ Add Material</button>
+        </form>
+        
+    </div>
+    
+</body>
+</html>

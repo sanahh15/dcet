@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ subject.name }} - Study Materials</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #f0eff2, #f2f3f6);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #000;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        .btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 18px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-left: 10px;
+            font-size: 14px;
+        }
+
+        .btn:hover {
+            background-color: #000;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        /* ===== SPLIT LAYOUT ===== */
+        .split-container {
+            display: flex;
+            gap: 20px;
+        }
+
+        /* LEFT PANEL */
+        .left-panel {
+            width: 65%;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        /* RIGHT PANEL */
+        .right-panel {
+            width: 35%;
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+
+        /* ===== MATERIAL CARD ===== */
+        .material {
+            background: #f9f9f9;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #000;
+            border-radius: 5px;
+        }
+
+        .material h3 {
+            margin-top: 0;
+        }
+
+        .question {
+            background: white;
+            padding: 15px;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+        }
+
+        .answer {
+            background: #e8f5e9;
+            padding: 15px;
+            margin-top: 10px;
+            border-left: 4px solid green;
+        }
+
+        .download a {
+            display: inline-block;
+            margin-top: 10px;
+            background: #2196F3;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        /* ===== NOTES ===== */
+        .right-panel textarea {
+            width: 100%;
+            height: 300px;
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        .save-btn {
+            margin-top: 10px;
+            padding: 10px;
+            width: 100%;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* ================= MOBILE RESPONSIVE (ONLY ADDITION) ================= */
+        @media (max-width: 768px) {
+
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .split-container {
+                flex-direction: column;
+            }
+
+            .left-panel,
+            .right-panel {
+                width: 100%;
+            }
+
+            .right-panel {
+                position: static;
+            }
+
+            body {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>{{ subject.name }}</h1>
+    <div>
+        <a href="/student_dashboard" class="back-btn">← Back to Dashboard</a>
+        <a href="/student_logout" class="btn">Logout</a>
+    </div>
+</header>
+
+<div class="split-container">
+
+    <!-- ================= LEFT SIDE ================= -->
+    <div class="left-panel">
+        <h2>📚 Study Materials (DCET C-20)</h2>
+
+        {% if dcet_materials %}
+            {% for material in dcet_materials %}
+                <div class="material">
+                    <h3>{{ material.title }}</h3>
+
+                    <div class="question">
+                        <strong>📖 Question / Topic</strong>
+                        <p>{{ material.question }}</p>
+                    </div>
+
+                    {% if material.answer %}
+                        <div class="answer">
+                            <strong>✅ Explanation</strong>
+                            <p>{{ material.answer }}</p>
+                        </div>
+                    {% endif %}
+
+                    {% if material.qp_file %}
+                        <div class="download">
+                            <a href="/{{ material.qp_file }}" download>
+                                📄 Download Question Paper
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No materials available yet.</p>
+        {% endif %}
+    </div>
+
+    <!-- ================= RIGHT SIDE ================= -->
+    <div class="right-panel">
+        <h2>📝 Your Notes</h2>
+
+        <form method="POST" action="/save_notes/{{ subject.id }}">
+            <textarea id="notesPad"
+                placeholder="Write your calculations here..."
+                style="
+                width:100%;
+                height:350px;
+                font-size:16px;
+                font-family:'Courier New', monospace;
+                ">
+            </textarea>
+
+            <button onclick="saveNotes()">💾 Save Notes</button>
+            <button onclick="clearNotes()">🧹 Clear</button>
+
+            <script>
+                const key = "dcet_notes_{{ subject.id }}";
+
+                function saveNotes() {
+                    localStorage.setItem(
+                        key,
+                        document.getElementById("notesPad").value
+                    );
+                      alert("Sahana.dev\n\nNotes saved successfully ✅");
+                }
+
+                function clearNotes() {
+                    document.getElementById("notesPad").value = "";
+                    localStorage.removeItem(key);
+                }
+
+                document.getElementById("notesPad").value =
+                    localStorage.getItem(key) || "";
+            </script>
+
+            <button type="submit" class="save-btn">💾 Saved Notes</button>
+        </form>
+    </div>
+       <div style="text-align: center; margin-top: 50px;">
+    <h3>Ready for the DCET Practice Test?</h3>
+    <hr style="margin: 50px 0; border: 0; border-top: 1px solid #eee;">
+
+<section id="mcq-section" style="text-align: center; padding: 40px; background-color: #f9f9f9; border-radius: 10px;">
+    <h2 style="color: #333;">Ready to Test Your Knowledge?</h2>
+    <p style="color: #666; font-size: 1.1em;">Take our randomized 20-question practice exam to prepare for your DCET finals.</p>
+    
+    <a href="/mcq-test" style="
+        display: inline-block;
+        margin-top: 20px;
+        padding: 15px 40px;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        font-weight: bold;
+        border-radius: 50px;
+        box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+        transition: 0.3s;
+    ">
+        Start 20-Question MCQ Test
+    </a>
+</section>
+<div id="mcq-tags" style="margin: 10px auto; max-width: 1000px; padding: 0 15px;">
+    <p style="font-size: 12px; color: #888; margin-bottom: 5px; font-weight: bold; text-transform: uppercase;">Practice Tests:</p>
+    
+    <div class="tag-scroll" style="
+        display: flex;
+        overflow-x: auto;
+        gap: 8px;
+        padding-bottom: 5px;
+        white-space: nowrap;
+        scrollbar-width: none;
+    ">
+       
+       <div class="tag-scroll">
+    <a href="/mcq-test/maths" class="mcq-badge">Maths</a>
+    <a href="/mcq-test/statistics_analytics" class="mcq-badge">Stats & Analytics</a>
+    <a href="/mcq-test/feee" class="mcq-badge">FEEE</a>
+    <a href="/mcq-test/project_management" class="mcq-badge">Project Mgmt</a>
+    <a href="/mcq-test/it_skills" class="mcq-badge">IT Skills</a>
+</div>
+    
+</div>
+
+<style>
+    /* Styling for the small tags */
+    .mcq-badge {
+        display: inline-block;
+        padding: 6px 14px;
+        background: #f0f0f0;
+        color: #333;
+        text-decoration: none;
+        border-radius: 20px;
+        font-size: 13px;
+        border: 1px solid #ddd;
+        transition: all 0.2s ease;
+    }
+    .mcq-badge:hover {
+        background: #0a1827;
+        color: white;
+        border-color: #007bff;
+    }
+    .tag-scroll::-webkit-scrollbar { display: none; }
+</style>
+    
+</div>
+
+</div>
+
+</body>
+</html>

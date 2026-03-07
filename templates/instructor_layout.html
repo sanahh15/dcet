@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>{% block title %}Instructor Dashboard{% endblock %}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+
+body{
+margin:0;
+font-family:'Poppins',sans-serif;
+display:flex;
+background:#a2beee;
+}
+
+/* SIDEBAR */
+
+aside{
+width:250px;
+height:100vh;
+background:#24282c;
+color:white;
+padding-top:20px;
+position:fixed;
+left:0;
+top:0;
+}
+
+.page-titles {
+text-align:center;
+margin-bottom:40px;
+font-size:22px;
+font-weight:600;
+}
+
+aside a{
+display:block;
+padding:15px 25px;
+color:white;
+text-decoration:none;
+transition:0.3s;
+}
+
+aside a:hover{
+background:#e2ef26;
+}
+
+/* MAIN CONTENT */
+
+.main{
+margin-left:250px;
+padding:40px;
+width:100%;
+}
+
+.main h1{
+color:#001f3f;
+}
+
+.logout{
+background:#ff4d4d;
+margin-top:30px;
+text-align:center;
+}
+
+.logout:hover{
+background:#cc0000;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<aside>
+
+<h3 class="page-titles">Instructor Panel 👨‍🏫</h3>
+<div class="sidebar-links">
+<a href="/instructor_dashboard">🏠 Dashboard</a>
+<a href="/instructor/add_study_material">📚 Upload Study Materials</a>
+<a href="/instructor/add_mcq">📝 Add MCQ Questions</a>
+<a href="/instructor/generate_mcqs">🤖 Generate Sample MCQs</a>
+<a href="/instructor/add_announcement">📢 Post Announcement</a>
+<a href="/instructor/test_results">📊 View Student Test Results</a>
+<a href="/instructor/logout" class="logout">🚪 Logout</a>
+</div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<div class="main" id="main-content">
+{% block content %}{% endblock %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    const links = document.querySelectorAll('.sidebar-links a:not(.logout)');
+
+    links.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            const url = this.getAttribute('href');
+
+            fetch(url)
+            .then(response => response.text())
+            .then(data => {
+
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(data, "text/html");
+
+                const newContent = doc.querySelector("#main-content").innerHTML;
+
+                document.querySelector("#main-content").innerHTML = newContent;
+
+                history.pushState(null, "", url);
+            });
+
+        });
+    });
+
+});
+</script>
+
+</body>
+</html>

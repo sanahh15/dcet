@@ -1,0 +1,88 @@
+{% extends "instructor_layout.html" %}
+
+{% block title %}Add Study Material{% endblock %}
+
+{% block content %}
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    h2 {
+        text-align: center;
+        margin-bottom: 40px;
+        font-size: 32px;
+        color: #04101c;
+    }
+
+    form {
+        max-width: 800px;
+        margin: auto;
+        background: white;
+        color: #040709;
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 15px 40px rgba(9, 9, 9, 0.3);
+    }
+
+    label {
+        display: block;
+        font-weight: 600;
+        margin-top: 15px;
+        margin-bottom: 5px;
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 15px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    textarea {
+        min-height: 250px;
+        resize: vertical;
+    }
+
+    button[type="submit"] {
+        display: block;
+        width: 100%;
+        background: linear-gradient(to right, #28a745, #218838);
+        color: white;
+        padding: 15px;
+        border: none;
+        border-radius: 10px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 20px;
+    }
+
+    button[type="submit"]:hover {
+        background: linear-gradient(to right, #218838, #1e7e34);
+    }
+</style>
+
+<h2>📚 Upload Study Material</h2>
+
+<form method="POST">
+    <label for="subject">Select Subject:</label>
+    <select id="subject" name="subject" required>
+        <option value="">-- Choose a Subject --</option>
+        {% for value, label in subjects %}
+            <option value="{{ value }}">{{ label }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="title">Material Title:</label>
+    <input type="text" id="title" name="title" placeholder="e.g., Chapter 5 - Calculus Basics" required>
+
+    <label for="content">Content/Notes:</label>
+    <textarea id="content" name="content" placeholder="Enter study material content here..." required></textarea>
+
+    <button type="submit">📤 Upload Material</button>
+</form>
+
+{% endblock %}

@@ -1,0 +1,46 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ branch }} - DCET</title>
+    
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f6ff;
+            padding: 40px;
+        }
+        .box {
+            display: inline-block;
+            width: 200px;
+            padding: 20px;
+            margin: 15px;
+            background: white;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+        .box a {
+            text-decoration: none;
+            font-weight: bold;
+            color: #1a237e;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Welcome to DCET Study Portal</h1>
+<h2>Learn {{ branch }}</h2>
+
+<div>
+    {% for subject in subjects %}
+        <div class="box">
+            <a href="/student/subject/{{ subject.id }}">
+                {{ subject.name }}
+            </a>
+        </div>
+    {% endfor %}
+</div>
+
+</body>
+</html>

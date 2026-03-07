@@ -1,0 +1,70 @@
+{% extends "instructor_layout.html" %}
+
+{% block title %}Generate Sample MCQs{% endblock %}
+
+{% block content %}
+
+<style>
+h2{
+text-align: center;
+font-size:34px;
+margin-bottom:50px;
+color: #001f3f;
+}
+
+.subjects-container{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:30px;
+width:80%;
+max-width:1000px;
+margin: 0 auto;
+}
+
+.subject-card{
+background:white;
+color:#001f3f;
+padding:40px 20px;
+border-radius:15px;
+text-align:center;
+font-weight:600;
+font-size:20px;
+text-decoration:none;
+transition:0.3s;
+box-shadow:0 8px 20px rgba(0,0,0,0.25);
+}
+
+.subject-card:hover{
+transform:translateY(-8px) scale(1.05);
+background:#007bff;
+color:white;
+}
+</style>
+
+<h2>Select Subject to Generate MCQs</h2>
+
+<div class="subjects-container">
+
+<a class="subject-card" href="/instructor/generate_mcqs/engineering_mathematics">
+Engineering Mathematics
+</a>
+
+<a class="subject-card" href="/instructor/generate_mcqs/statistics_analytics">
+Statistics & Analytics
+</a>
+
+<a class="subject-card" href="/instructor/generate_mcqs/it_skills">
+IT Skills
+</a>
+
+<a class="subject-card" href="/instructor/generate_mcqs/feee">
+FEEE
+</a>
+
+<a class="subject-card" href="/instructor/generate_mcqs/pms">
+PMS
+</a>
+
+</div>
+
+{% endblock %}

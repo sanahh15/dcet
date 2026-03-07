@@ -1,0 +1,40 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MCQ Test - DCET Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f4; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 8px; }
+        h1 { text-align: center; color: #003366; }
+        .question { margin-bottom: 25px; }
+        .question p { font-weight: bold; }
+        label { display: block; margin: 8px 0; cursor: pointer; }
+        .submit-btn { display: block; width: 100%; padding: 15px; background: #003366; color: #fff; border: none; border-radius: 6px; font-size: 1.1rem; cursor: pointer; }
+        .submit-btn:hover { background: #002244; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>DCET Practice Exam</h1>
+        <p>Please answer all {{ questions|length }} questions below:</p>
+
+        <form method="POST">
+            <input type="hidden" name="subject" value="{{ subject }}">
+
+            {% for q in questions %}
+            <div class="question">
+                <p>Q{{ loop.index }}. {{ q.question }}</p>
+                <label><input type="radio" name="{{ q.id }}" value="1" required> {{ q.option1 }}</label>
+                <label><input type="radio" name="{{ q.id }}" value="2"> {{ q.option2 }}</label>
+                <label><input type="radio" name="{{ q.id }}" value="3"> {{ q.option3 }}</label>
+                <label><input type="radio" name="{{ q.id }}" value="4"> {{ q.option4 }}</label>
+            </div>
+            {% endfor %}
+
+            <button type="submit" class="submit-btn">Submit Test</button>
+        </form>
+    </div>
+</body>
+</html>

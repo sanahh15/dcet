@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Instructor Dashboard</title>
+    <style>
+        * { box-sizing: border-box; margin:0; padding:0; }
+
+        /* Fixed Sidebar */
+        .sidebar {
+            width: 220px;
+            height: 100vh;
+            background: #23292f;
+            color: white;
+            position: fixed;  /* FIXED sidebar */
+            top: 0;
+            left: 0;
+            padding-top: 20px;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .sidebar a {
+            display: block;
+            color: white;
+            padding: 12px 20px;
+            text-decoration: none;
+        }
+
+        .sidebar a:hover {
+            background: #eceff1;
+        }
+
+        /* Right Content */
+        .content {
+            margin-left: 220px; /* space for sidebar */
+            width: calc(100% - 220px);
+            min-height: 100vh;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(250, 246, 246, 0.93);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar: static, never reloads -->
+<div class="sidebar">
+    <h2>Instructor</h2>
+    <a href="/instructor/add_mcq">Add MCQ</a>
+    <a href="/instructor/generate_mcq">Generate MCQ</a>
+    <a href="/instructor/announcement">Announcement</a>
+    <a href="/instructor/results">Results</a>
+    <a href="/instructor/logout">Logout</a>
+</div>
+
+<!-- Right content changes per page -->
+<div class="content">
+    {% block content %}
+    <h3>Welcome to Instructor Dashboard</h3>
+    <p>Click a menu on the left to open a page.</p>
+    {% endblock %}
+</div>
+
+</body>
+</html>

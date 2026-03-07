@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Daily Target</title>
+</head>
+<body>
+
+<h2>Add Daily Target</h2>
+
+<form method="POST">
+    <label>Branch ID:</label><br>
+    <input type="number" name="branch_id" required><br><br>
+
+    <label>Subject:</label><br>
+    <input type="text" name="subject" required><br><br>
+
+    <label>Topic:</label><br>
+    <input type="text" name="topic" required><br><br>
+
+    <label>Date:</label><br>
+    <input type="date" name="target_date" required><br><br>
+
+    <button type="submit">Add Target</button>
+</form>
+<div style="max-width: 500px; margin: 40px auto; font-family: sans-serif; padding: 30px; border: 2px solid #000080; border-radius: 15px;">
+    
+    <h2 style="color: #000080; text-align: center;">Set DCET Target</h2>
+
+    <form method="POST">
+        <label><b>Select Subject:</b></label><br>
+        <select name="subject" required style="width: 100%; padding: 10px; margin: 10px 0;">
+            <option value="Engineering Mathematics">Engineering Mathematics</option>
+            <option value="Statistics and Analytics">Statistics and Analytics</option>
+            <option value="IT Skills">IT Skills</option>
+            <option value="FEEE">FEEE</option>
+            <option value="PMS">PMS</option>
+        </select><br>
+
+        <label><b>Topic Name:</b></label><br>
+        <input type="text" name="topic" placeholder="e.g. Matrices" required style="width: 100%; padding: 10px; margin: 10px 0;"><br>
+
+        <label><b>Branch ID:</b></label><br>
+        <input type="number" name="branch_id" value="1" style="width: 100%; padding: 10px; margin: 10px 0;"><br>
+
+        <label><b>Date:</b></label><br>
+        <input type="date" name="target_date" required style="width: 100%; padding: 10px; margin: 10px 0;"><br>
+
+        <button type="submit" style="width: 100%; background: #000080; color: white; padding: 15px; border: none; cursor: pointer;">
+            SAVE DCET TARGET
+        </button>
+    </form>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>MCQ Attendance</title>
+
+<style>
+
+body{
+font-family:'Poppins',sans-serif;
+background:#f4f6f9;
+margin:0;
+padding:40px;
+}
+
+.container{
+width:900px;
+margin:auto;
+background:white;
+padding:30px;
+border-radius:10px;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+h2{
+text-align:center;
+margin-bottom:20px;
+}
+
+.total{
+font-size:14px;
+margin-bottom:20px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+}
+
+th{
+background:#001f3f;
+color:white;
+padding:10px;
+}
+
+td{
+padding:10px;
+text-align:center;
+border-bottom:1px solid #ddd;
+}
+
+tr:hover{
+background:#f1f1f1;
+}
+
+.back{
+display:inline-block;
+margin-top:20px;
+padding:10px 15px;
+background:#1f4fa3;
+color:white;
+text-decoration:none;
+border-radius:5px;
+}
+
+.back:hover{
+background:#163b7a;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>MCQ Test Attendance</h2>
+
+<p class="total"><strong>Total Students Attended:</strong> {{ total_attended }}</p>
+
+<table>
+
+<tr>
+<th>Student Name</th>
+<th>Subject</th>
+<th>Score</th>
+<th>Date</th>
+</tr>
+
+{% for r in mcq_results %}
+
+<tr>
+<td>{{ r.student.name }}</td>
+<td>{{ r.subject }}</td>
+<td>{{ r.score }}/{{ r.total }}</td>
+<td>{{ r.attended_on.strftime('%d-%m-%Y') }}</td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+<a href="/admin_dashboard" class="back">⬅ Back to Dashboard</a>
+
+</div>
+
+</body>
+</html>

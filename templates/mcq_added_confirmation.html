@@ -1,0 +1,37 @@
+{% extends "instructor_layout.html" %}
+
+{% block title %}MCQs Added{% endblock %}
+
+{% block content %}
+
+<style>
+    .confirmation {
+        text-align: center;
+        padding: 50px;
+    }
+    h2 {
+        color: #003366;
+    }
+    .btn {
+        display: inline-block;
+        padding: 15px 25px;
+        margin: 15px;
+        background-color: #4CAF50;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: bold;
+    }
+    .btn:hover {
+        background-color: #45a049;
+    }
+</style>
+
+<div class="confirmation">
+    <h2>🎉 Added {{ added_count }} MCQs for {{ subject }}! Total: {{ final_count }}</h2>
+
+    <a href="/instructor/generate_mcqs" class="btn">Generate MCQs for Another Subject</a>
+    <a href="/instructor/dashboard" class="btn">Back to Dashboard</a>
+</div>
+
+{% endblock %}
