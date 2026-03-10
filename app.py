@@ -88,8 +88,8 @@ class Admin(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(50), unique=True)
     password = db.Column(db.String(50))
-   
 
+    
 class Student(db.Model):
     __tablename__ = 'student'
     __table_args__ = {'extend_existing': True}  # This allows redefinition
