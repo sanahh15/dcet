@@ -47,27 +47,21 @@ def login():
         email = request.form['email']
         password = request.form['password']
 
-        # -------- ADMIN LOGIN --------
         admin = Admin.query.filter_by(email=email).first()
         if admin and admin.password == password:
             session['admin_id'] = admin.id
             return redirect('/admin_dashboard')
 
-
-        # -------- INSTRUCTOR LOGIN --------
         instructor = Instructor.query.filter_by(email=email).first()
         if instructor and instructor.password == password:
             session['instructor_id'] = instructor.id
             return redirect('/instructor_dashboard')
 
-
-        # -------- STUDENT LOGIN --------
         student = Student.query.filter_by(email=email).first()
         if student and student.password == password:
             session['student_id'] = student.id
             session['student_name'] = student.name
             return redirect('/student_dashboard')
-
 
         flash("Invalid Email or Password")
 
@@ -427,7 +421,9 @@ def student_register():
         db.session.add(student)
         db.session.commit()
 
-        return redirect(url_for('student_login'))
+        print("Student registered successfully")
+
+        return redirect(url_for('login'))
 
     return render_template('student_register.html', branches=branches)
 
