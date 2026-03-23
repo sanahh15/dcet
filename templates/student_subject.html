@@ -80,7 +80,7 @@
             border-left: 5px solid #000;
             border-radius: 5px;
         }
-
+r
         .material h3 {
             margin-top: 0;
         }
@@ -191,12 +191,12 @@
                     {% endif %}
 
                     {% if material.qp_file %}
-                        <div class="download">
-                            <a href="/{{ material.qp_file }}" download>
-                                📄 Download Question Paper
-                            </a>
-                        </div>
-                    {% endif %}
+    <div class="download">
+        <a href="{{ url_for('static', filename='uploads/' + material.qp_file) }}" target="_blank">
+            📄 View Question Paper
+        </a>
+    </div>
+{% endif %}
                 </div>
             {% endfor %}
         {% else %}

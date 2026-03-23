@@ -3,14 +3,16 @@
 <head>
 <title>{% block title %}Instructor Dashboard{% endblock %}</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
 
 body{
 margin:0;
 font-family:'Poppins',sans-serif;
 display:flex;
-background:#a2beee;
+background:#a0bef2;
 }
+
 
 /* SIDEBAR */
 
@@ -33,6 +35,7 @@ font-weight:600;
 }
 
 aside a{
+background:linear-gradient(180deg,#1e293b,#0f172a);
 display:block;
 padding:15px 25px;
 color:white;
@@ -41,7 +44,7 @@ transition:0.3s;
 }
 
 aside a:hover{
-background:#e2ef26;
+background:linear-gradient(135deg,#3b82f6,#1d4ed8);
 }
 
 /* MAIN CONTENT */
@@ -70,19 +73,17 @@ background:#cc0000;
 </head>
 
 <body>
-
-<!-- SIDEBAR -->
 <aside>
 
 <h3 class="page-titles">Instructor Panel 👨‍🏫</h3>
 <div class="sidebar-links">
-<a href="/instructor_dashboard">🏠 Dashboard</a>
-<a href="/instructor/add_study_material">📚 Upload Study Materials</a>
-<a href="/instructor/add_mcq">📝 Add MCQ Questions</a>
-<a href="/instructor/generate_mcqs">🤖 Generate Sample MCQs</a>
-<a href="/instructor/add_announcement">📢 Post Announcement</a>
-<a href="/instructor/test_results">📊 View Student Test Results</a>
-<a href="/instructor/logout" class="logout">🚪 Logout</a>
+    <a href="{{ url_for('instructor.dashboard') }}"><p>🏠 DASHBOARD</p></a>
+    <a href="{{ url_for('instructor.instructor_subjects') }}"><p>📚 Upload Study Materials</p></a>
+    <a href="{{ url_for('instructor.select_subject_for_mcq') }}"><p>📝 Add MCQ Questions</p></a>
+    <a href="{{ url_for('instructor.generate_mcqs_page') }}"><p>🤖 Generate Sample MCQs</p></a>
+    <a href="{{ url_for('instructor.add_announcement') }}"><p>📢 Post Announcement</p></a>
+    <a href="{{ url_for('instructor.instructor_test_results') }}"><p>📊 View Student Test Results</p></a>
+    <a href="{{ url_for('instructor.instructor_logout') }}" class="logout">🚪 Logout</a>
 </div>
 </aside>
 

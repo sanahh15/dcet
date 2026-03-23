@@ -1,27 +1,40 @@
-from flask import Flask, flash, render_template, request, redirect, url_for, session
+from flask import Flask, flash, render_template, request, redirect, url_for, session, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import joinedload
 from authlib.integrations.flask_client import OAuth
-
+from models import db, Admin, Branch, Subject, DailyTarget  # ✅ use db from models.py
+from models import Admin, Instructor, Student, Branch
 from datetime import timedelta, datetime
-from flask import send_from_directory
-import sqlite3
 import random
 import os
 
-# TestResult model defined below to avoid circular import
+# Blueprints
+from routes.admin_routes import admin
+from routes.instructor_routes import instructor
+from routes.student_routes import student
+
 print("Current Template Folder:", os.path.abspath("templates"))
 
-# Use request-time connections via `get_db()`; avoid running DB queries at import.
+# Flask app initialization
 app = Flask(__name__)
 app.secret_key = "dcet_secret_key"
-
 app.permanent_session_lifetime = timedelta(days=7)  # login valid for 7 days
+
 # Database config
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Initialize extensions (use already imported db)
+db.init_app(app)
 oauth = OAuth(app)
+
+# Register blueprints
+# 3️⃣ Register blueprints
+app.register_blueprint(student)                  # student routes
+app.register_blueprint(instructor, url_prefix='/instructor')  # instructor routes
+app.register_blueprint(admin, url_prefix='/admin')  # admin routes
+
+
 
 # JumpCloud OIDC configuration
 jumpcloud = oauth.register(
@@ -33,41 +46,45 @@ jumpcloud = oauth.register(
     api_base_url='https://oauth.jumpcloud.com/',
     client_kwargs={'scope': 'openid profile email'},
 )
-db = SQLAlchemy(app)
 
 @app.route('/')
 def home():
     return render_template('login.html')
 
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-
     if request.method == 'POST':
+        session.clear()  # clear old sessions
+        email = request.form.get('email')
+        password = request.form.get('password')
 
-        email = request.form['email']
-        password = request.form['password']
-
+        # ----- Admin -----
         admin = Admin.query.filter_by(email=email).first()
         if admin and admin.password == password:
             session['admin_id'] = admin.id
-            return redirect('/admin_dashboard')
+            return redirect(url_for('admin.dashboard'))# match blueprint route exactly
 
+        # ----- Instructor -----
         instructor = Instructor.query.filter_by(email=email).first()
         if instructor and instructor.password == password:
             session['instructor_id'] = instructor.id
-            return redirect('/instructor_dashboard')
+            session['instructor_name'] = instructor.name
+            return redirect(url_for('instructor.dashboard'))# match blueprint route exactly
 
+        # ----- Student -----
         student = Student.query.filter_by(email=email).first()
         if student and student.password == password:
             session['student_id'] = student.id
             session['student_name'] = student.name
-            return redirect('/student_dashboard')
+            return redirect(url_for('student.student_dashboard'))
 
+        # If no role matched
         flash("Invalid Email or Password")
+        return render_template('login.html')
 
     return render_template('login.html')
-
-# legacy login aliases will redirect to unified login
+# legacy login aliases will redirect to unified loginu
 @app.route('/student_login')
 @app.route('/admin/login')
 @app.route('/instructor/login')
@@ -83,122 +100,8 @@ def legacy_login():
 
 
 
-# ---------------- MODELS ----------------
-class Admin(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(50), unique=True)
-    password = db.Column(db.String(50))
-
-    
-class Student(db.Model):
-    __tablename__ = 'student'
-    __table_args__ = {'extend_existing': True}  # This allows redefinition
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
-    dob = db.Column(db.String(20), nullable=False)
-    gender = db.Column(db.String(10))
-    email = db.Column(db.String(100), unique=True)
-    password = db.Column(db.String(50))
-    branch_id = db.Column(db.Integer, db.ForeignKey('branch.id'))
 
 
-class Branch(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True, nullable=False)
-    subjects = db.relationship('Subject', backref='branch', lazy=True)
-
-class Subject(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    branch_id = db.Column(db.Integer, db.ForeignKey('branch.id'), nullable=False)
-
-class Material(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200), nullable=False)
-    question = db.Column(db.Text, nullable=False)
-    answer = db.Column(db.Text)
-    pdf_file = db.Column(db.String(200))
-    subject_id = db.Column(db.Integer, db.ForeignKey('subject.id'))
-
-
-
-class DCETMaterial(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    subject_id = db.Column(db.Integer, db.ForeignKey('subject.id'), nullable=False)
-    title = db.Column(db.String(200), nullable=False)
-    question = db.Column(db.Text, nullable=False)
-    answer = db.Column(db.Text, nullable=True)
-    qp_file = db.Column(db.String(200), nullable=True)
-      # optional PDF
-
-class Announcement(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    message = db.Column(db.String(300))
-
-
-class TestResult(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    student_name = db.Column(db.String(100), nullable=False)
-    subject = db.Column(db.String(100), nullable=False)
-    score = db.Column(db.Integer, nullable=False)
-    total = db.Column(db.Integer, nullable=False)
-    date_taken = db.Column(db.DateTime, default=datetime.utcnow)
-
-class MCQResult(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.Integer, db.ForeignKey('student.id'))
-    subject = db.Column(db.String(100))
-    score = db.Column(db.Integer)
-    total = db.Column(db.Integer)
-    attended_on = db.Column(db.DateTime, default=datetime.utcnow)
-
-    student = db.relationship('Student', backref='mcq_results')
-
-class Question(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    # Add or ensure this line exists:
-    subject = db.Column(db.String(100), nullable=False) 
-    q_text = db.Column(db.Text, nullable=False)
-    option_a = db.Column(db.String(200))
-    option_b = db.Column(db.String(200))
-    option_c = db.Column(db.String(200))
-    option_d = db.Column(db.String(200))
-    correct_ans = db.Column(db.String(200))
-
-class Instructor(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
-    email = db.Column(db.String(100), unique=True)
-    password = db.Column(db.String(200))
-
-
-class MCQ(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    subject = db.Column(db.String(100))
-    
-    question = db.Column(db.Text)
-    option1 = db.Column(db.String(200))
-    option2 = db.Column(db.String(200))
-    option3 = db.Column(db.String(200))
-    option4 = db.Column(db.String(200))
-    correct_answer = db.Column(db.String(200))
-
-
-
-@app.route('/take_test/<subject_name>')
-def take_test(subject_name):
-    if 'student_id' not in session:
-        return redirect('/login')
-
-    # This filters questions so student only sees the selected DCET subject
-    questions = Question.query.filter_by(subject=subject_name).all()
-    
-    # If no questions exist for a subject yet, we handle it gracefully
-    if not questions:
-        return "<h3>No questions added for " + subject_name + " yet.</h3>"
-
-    return render_template('test.html', questions=questions, subject=subject_name)
 # ✅ Corrected: DCETMaterial now top-level, not inside Material
 
 # ---------------- CREATE DB + ADMIN ----------------
@@ -213,7 +116,7 @@ def init_db():
     """Create tables and seed default data. Must be called from an
     active application context and only once (see __main__ guard)."""
     with app.app_context():
-        db.create_all()
+        #db.create_all()
 
         # Admin account
         if not Admin.query.filter_by(email="admin@gmail.com").first():
@@ -233,69 +136,6 @@ def init_db():
         except Exception:
             db.session.rollback()
 
-# ---------------- ROUTES ----------------
-
-
-# -------- ADMIN --------
-
-@app.route('/admin/dashboard', methods=['GET', 'POST'])
-def admin_dashboard():
-    if 'admin_id' not in session and 'instructor_id' not in session:
-        return redirect('/login')
-
-    # ---------------- POST ACTIONS (UNCHANGED) ----------------
-    if request.method == 'POST':
-        branch_name = request.form.get('branch')
-        subject_name = request.form.get('subject')
-        branch_id = request.form.get('branch_id')
-
-        # Add new branch
-        if branch_name:
-            if not Branch.query.filter_by(name=branch_name).first():
-                new_branch = Branch(name=branch_name)
-                db.session.add(new_branch)
-                db.session.commit()
-
-        # Add new subject
-        if subject_name and branch_id:
-            try:
-                new_subject = Subject(
-                    name=subject_name,
-                    branch_id=int(branch_id)
-                )
-                db.session.add(new_subject)
-                db.session.commit()
-            except:
-                db.session.rollback()
-
-    # ---------------- EXISTING DATA (UNCHANGED) ----------------
-    branches = Branch.query.all()
-
-    for branch in branches:
-        branch.subjects = Subject.query.filter_by(
-            branch_id=branch.id
-        ).all()
-
-    subjects = Subject.query.all()
-
-    # ---------------- NEW UPGRADE (MCQ RESULTS) ----------------
-    mcq_results = MCQResult.query.order_by(
-        MCQResult.attended_on.desc()
-    ).all()
-
-    total_attended = len(mcq_results)
-
-    # ---------------- RENDER ----------------
-    return render_template(
-        'admin_dashboard.html',
-        branches=branches,
-        subjects=subjects,
-        mcq_results=mcq_results,
-        total_attended=total_attended
-    )
-
-
-
 # -------- STUDENT --------
 
 @app.route('/student')
@@ -307,35 +147,7 @@ def student():
 
 from datetime import datetime  # Make sure this is at the top of your app.py
 
-@app.route('/student_dashboard')
-def student_dashboard():
-    if 'student_id' not in session:
-        return redirect('/login')
 
-    student = db.session.get(Student, session['student_id'])
-    if not student:
-        session.clear()
-        return redirect('/login')
-    
-    # 1. Get today's date to look for targets
-    today = datetime.now().date()
-    
-    # 2. Fetch today's target based on the student's branch
-    current_target = DailyTarget.query.filter_by(
-        target_date=today, 
-        branch_id=student.branch_id
-    ).first()
-    
-    # 3. Keep your existing subjects logic
-    subjects = []
-    if student.branch_id:
-        subjects = Subject.query.filter_by(branch_id=student.branch_id).all()
-
-    # 4. Pass 'target' to the HTML
-    return render_template('student_dashboard.html', 
-                           student_name=student.name,
-                           subjects=subjects,
-                           target=current_target) # <--- Added this
 
 @app.after_request
 def add_header(response):
@@ -348,10 +160,7 @@ def add_header(response):
     response.headers["Expires"] = "0"
     return response
 
-@app.route('/student_logout')
-def student_logout():
-    session.clear()
-    return redirect('/login')
+
 
 @app.route('/subjects')
 def subjects():
@@ -382,263 +191,16 @@ def callback():
     token = oauth.jumpcloud.authorize_access_token()
     user = oauth.jumpcloud.parse_id_token(token)
 
-class DailyTarget(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    branch_id = db.Column(db.Integer)
-    subject = db.Column(db.String(100))
-    topic = db.Column(db.String(200))
-    target_date = db.Column(db.Date)
 
 
-@app.route('/student/register', methods=['GET', 'POST'])
-def student_register():
-    branches = Branch.query.all()  # get branches from DB
-
-    if request.method == 'POST':
-        name = request.form['name']
-        dob = request.form['dob']
-        gender = request.form['gender']
-        branch_id = request.form['branch_id']  # this is now ID
-        email = request.form['email']
-        password = request.form['password']
-        confirm = request.form['confirm_password']
-
-        if password != confirm:
-            return render_template('student_register.html', error="Passwords do not match", branches=branches)
-
-        if Student.query.filter_by(email=email).first():
-            return render_template('student_register.html', error="Email already registered", branches=branches)
-
-        # Create student
-        student = Student(
-            name=name,
-            dob=dob,
-            gender=gender,
-            email=email,
-            password=password,
-            branch_id=branch_id  # store ID
-        )
-        db.session.add(student)
-        db.session.commit()
-
-        print("Student registered successfully")
-
-        return redirect(url_for('login'))
-
-    return render_template('student_register.html', branches=branches)
-
-@app.route('/admin/subject/<int:subject_id>/add-material', methods=['GET', 'POST'])
-def admin_add_material(subject_id):
-    subject = Subject.query.get_or_404(subject_id)
-
-    if request.method == 'POST':
-        title = request.form['title']
-        question = request.form['question']
-        
-        answer = request.form.get('answer')
-
-        file = request.files.get('qp_file')
-        filename = None
-
-        material = Material(
-            title=title,
-            question=question,
-            answer=answer,
-            pdf_file=filename,
-            subject_id=subject.id
-        )
-
-        db.session.add(material)
-        db.session.commit()
-
-        return redirect(f'/admin/subject/{subject.id}/materials')
-
-    return render_template('admin_add_material.html', subject=subject)
-           
-
-@app.route('/student/branch/<branch_name>')
-def student_branch(branch_name):
-    if 'student_id' not in session:
-        return redirect('/login')
-
-    branch = Branch.query.filter_by(name=branch_name).first()
-    if not branch:
-        return redirect('/student_dashboard')
-    
-    subjects = Subject.query.filter_by(branch_id=branch.id).all()
-
-    return render_template(
-        'student_branch.html',
-        branch=branch_name,
-        subjects=subjects
-    )
-
-@app.route('/student/subject/<int:subject_id>')
-def student_subject(subject_id):
-    if 'student_id' not in session:
-        return redirect('/login')
-
-    subject = db.session.get(Subject, subject_id)
-    if not subject:
-        return redirect('/student_dashboard')
-    
-    materials = Material.query.filter_by(subject_id=subject_id).all()
-    dcet_materials = DCETMaterial.query.filter_by(subject_id=subject_id).all()
-
-    return render_template(
-        'student_subject.html',
-        subject=subject,
-        materials=materials,
-        dcet_materials=dcet_materials
-    )
-
-@app.route('/student/dcet/<int:material_id>')
-def student_dcet(material_id):
-    if 'student_id' not in session:
-        return redirect('/login')
-
-    material = DCETMaterial.query.get_or_404(material_id)
-    return render_template('student_dcet.html', material=material)
-
-@app.route('/admin/edit-branch/<int:branch_id>', methods=['GET', 'POST'])
-def edit_branch(branch_id):
-    if 'admin_id' not in session:
-        return redirect('/login')
-
-    branch = Branch.query.get_or_404(branch_id)
-
-    if request.method == 'POST':
-        new_name = request.form['branch_name']
-        branch.name = new_name
-        db.session.commit()
-        return redirect('/admin/dashboard')
-
-    return render_template('edit_branch.html', branch=branch)
-
-# Delete a branch
-# ...existing code...
-@app.route('/admin/delete-branch/<int:branch_id>', methods=['POST'])
-def delete_branch(branch_id):
-    if 'admin_id' not in session:
-        return redirect('/login')
-
-    branch = Branch.query.get_or_404(branch_id)
-
-    # Delete all subjects and their related materials, then delete branch
-    for subject in list(branch.subjects):
-        for m in DCETMaterial.query.filter_by(subject_id=subject.id).all():
-            # remove uploaded file if exists
-            if m.qp_file:
-                try:
-                    import os
-                    os.remove(m.qp_file)
-                except Exception:
-                    pass
-            db.session.delete(m)
-        for m in Material.query.filter_by(subject_id=subject.id).all():
-            if m.pdf_file:
-                try:
-                    import os
-                    os.remove(m.pdf_file)
-                except Exception:
-                    pass
-            db.session.delete(m)
-        db.session.delete(subject)
-
-    db.session.delete(branch)
-    db.session.commit()
-    return redirect('/admin/dashboard')
-# ...existing code...
 
 
-# Delete a subject
-@app.route('/admin/delete-subject/<int:subject_id>', methods=['POST'])
-def delete_subject(subject_id):
-    if 'admin_id' not in session:
-        return redirect('/login')
+from werkzeug.utils import secure_filename
+import os
 
-    subject = Subject.query.get_or_404(subject_id)
+UPLOAD_FOLDER = 'static/materials'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-    # Optional: delete all materials under this subject
-    for material in DCETMaterial.query.filter_by(subject_id=subject.id).all():
-        db.session.delete(material)
-
-    db.session.delete(subject)
-    db.session.commit()
-    return redirect('/admin/dashboard')
-
-
-@app.route('/admin/add-dcet/<int:subject_id>', methods=['GET', 'POST'])
-def add_dcet(subject_id):
-    if 'admin_id' not in session:
-        return redirect('/login')
-
-    subject = Subject.query.get_or_404(subject_id)
-
-    if request.method == 'POST':
-        title = request.form.get('title')
-        question = request.form.get('question')
-        answer = request.form.get('answer', '')
-        qp_file = request.files.get('qp_file')
-
-        filename = None
-        if qp_file and qp_file.filename:
-            import os
-            os.makedirs('static/uploads', exist_ok=True)
-
-            filename = qp_file.filename              # ✅ ONLY filename
-            file_path = os.path.join('static', 'uploads', filename)
-            qp_file.save(file_path)
-
-        new_material = DCETMaterial(
-            subject_id=subject.id,
-            title=title,
-            question=question,
-            answer=answer,
-            qp_file=filename                           # ✅ store filename only
-        )
-
-        db.session.add(new_material)
-        db.session.commit()
-
-        return redirect(f'/admin/subject/{subject.id}/materials')
-
-    return render_template('admin_add_dcet.html', subject=subject)
-@app.route('/admin/subject/<int:subject_id>/materials')
-def admin_subject_materials(subject_id):
-    if 'admin_id' not in session:
-        return redirect('/login')
-
-    subject = Subject.query.get_or_404(subject_id)
-    materials = DCETMaterial.query.filter_by(subject_id=subject_id).all()
-
-    return render_template('admin_subject_materials.html', 
-                           subject=subject,
-                           materials=materials)
-
-@app.route('/admin/delete-dcet/<int:material_id>', methods=['POST'])
-def delete_dcet(material_id):
-    if 'admin_id' not in session:
-        return redirect('/login')
-
-    material = DCETMaterial.query.get_or_404(material_id)
-    subject_id = material.subject_id
-
-    # Optional: delete the uploaded file if exists
-    if material.qp_file:
-        import os
-        try:
-            os.remove(material.qp_file)
-        except Exception as e:
-            print(f"[LOG] Could not delete file: {e}")
-
-    db.session.delete(material)
-    db.session.commit()
-
-    return redirect(f'/admin/subject/{subject_id}/materials')
-
-
-# ...existing code...
 
 import random
 
@@ -839,259 +401,7 @@ def submit():
 
 from datetime import datetime, date
 
-# ---------------- ADMIN ADD TARGET ----------------
-@app.route('/admin/add_target', methods=['GET', 'POST'])
-def add_target():
-    if request.method == 'POST':
-        # Get data from the professional form
-        branch_id = int(request.form['branch_id'])
-        subject = request.form['subject']
-        topic = request.form['topic']
-        
-        # Convert the date string from the form into a Python date
-        date_str = request.form['target_date']
-        target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
 
-        # Save to your DailyTarget table
-        target = DailyTarget(
-            branch_id=branch_id,
-            subject=subject,
-            topic=topic,
-            target_date=target_date
-        )
-
-        db.session.add(target)
-        db.session.commit()
-
-        # Professional redirect back to see the result
-        return "SUCCESS: DCET Target Added! <a href='/student_dashboard'>View Dashboard</a>"
-
-    return render_template('admin_add_target.html')  
-
-@app.route('/admin/mcq-results')
-def admin_mcq_results():
-    # Fetch all results, newest first
-    results = MCQResult.query.order_by(MCQResult.attended_on.desc()).all()
-    
-    # Debugging: Print to your terminal to see if data exists
-    print(f"Found {len(results)} results in database") 
-    
-    return render_template('admin_mcq_results.html', results=results)
-
-
-@app.route("/admin_attendance")
-def admin_attendance():
-
-    mcq_results = MCQResult.query.all()
-
-    total_attended = len(mcq_results)
-
-    return render_template(
-        "admin_attendance.html",
-        mcq_results=mcq_results,
-        total_attended=total_attended
-    )
-
-
-# 📌 use a consistent path with a subdirectory rather than an underscore
-
-
-
-@app.route('/instructor_dashboard')
-def instructor_dashboard():
-    if 'instructor_id' not in session:
-        # previously used an underscore path which conflicted with redirects
-        return redirect('/login')
-
-
-    return render_template('instructor_dashboard.html')
-
-@app.route('/instructor/logout')
-def instructor_logout():
-    session.pop('instructor_id', None)
-    # logout should send them to the new login path as well
-    return redirect('/login')
-
-
-@app.route('/instructor/add_mcq')
-def select_subject_for_mcq():
-
-    if 'instructor_id' not in session:
-        return redirect('/login')
-
-    subjects = [
-        ("engineering_mathematics", "Engineering Mathematics"),
-        ("statistics_analytics", "Statistics & Analytics"),
-        ("it_skills", "IT Skills"),
-        ("feee", "Fundamentals of Electrical & Electronics Engineering"),
-        ("pms", "Project Management Skills")
-    ]
-
-    return render_template("select_subject.html", subjects=subjects)    
-
-@app.route('/instructor/add_mcq/<subject_slug>', methods=['GET', 'POST'])
-def add_mcq(subject_slug):
-
-    subject_slugs = {
-        "engineering_mathematics": "Engineering Mathematics",
-        "statistics_analytics": "Statistics & Analytics",
-        "it_skills": "IT Skills",
-        "feee": "FEEE",
-        "pms": "PMS"
-    }
-
-    subject = subject_slugs.get(subject_slug)
-
-    if not subject:
-        return "Invalid Subject"
-
-    if request.method == 'POST':
-        for i in range(1, 31):
-            question = request.form[f'question{i}']
-            option1 = request.form[f'option{i}_1']
-            option2 = request.form[f'option{i}_2']
-            option3 = request.form[f'option{i}_3']
-            option4 = request.form[f'option{i}_4']
-            correct = request.form[f'correct{i}']
-
-            new_mcq = MCQ(
-                subject=subject,
-                question=question,
-                option1=option1,
-                option2=option2,
-                option3=option3,
-                option4=option4,
-                correct_answer=correct
-            )
-
-            db.session.add(new_mcq)
-
-        db.session.commit()
-
-        added_count = 30
-        final_count = MCQ.query.filter_by(subject=subject).count()
-        return render_template('mcq_added_confirmation.html', subject=subject, added_count=added_count, final_count=final_count)
-
-    return render_template("instructor_add_mcq.html", subject=subject)
-# app and db are already defined at the top of this file, no need to re-import
-
-@app.route('/student/test/<subject_slug>', methods=['GET', 'POST'])
-def student_test(subject_slug):
-    # Map slug to proper subject name
-    subject = subject_slugs.get(subject_slug)
-    if not subject:
-        return "Invalid Subject"
-
-    # Pick 30 questions for that subject
-    questions = MCQ.query.filter_by(subject=subject).limit(30).all()
-
-    if request.method == 'POST':
-        score = 0
-        for q in questions:
-            selected = request.form.get(str(q.id))
-            if selected == q.correct_answer:
-                score += 1
-
-        # Save result to database for instructor tracking
-        result = TestResult(
-            student_name=session.get('student_name', 'Student Name'),
-            subject=subject,
-            score=score,
-            total=len(questions),
-            date_taken=datetime.now()
-        )
-        db.session.add(result)
-        db.session.commit()
-
-        # Pass additional data to results template
-        return render_template(
-            'results.html',
-            score=score,
-            total=len(questions),
-            subject=subject,
-            student_name=session.get('student_name', 'Student Name'),  # fallback if not logged in
-            test_date=datetime.now().strftime("%d %B %Y"),
-            instructor_name="Sahana"  # replace with your name
-        )
-
-    return render_template('test.html', questions=questions, subject=subject)
-
-@app.route('/instructor/test_results')
-def instructor_test_results():
-    # Fetch all test results, newest first
-    results = TestResult.query.order_by(TestResult.date_taken.desc()).all()
-    return render_template('instructor_test_results.html', results=results)
-
-@app.route('/instructor/generate_mcqs')
-def generate_mcqs_page():
-    return render_template('generate_mcqs.html')
-
-@app.route('/instructor/add_study_material', methods=['GET', 'POST'])
-def add_study_material():
-    if 'instructor_id' not in session:
-        return redirect('/login')
-    
-    if request.method == 'POST':
-        subject = request.form.get('subject')
-        title = request.form.get('title')
-        content = request.form.get('content')
-        
-        # You can store this in database if you have a StudyMaterial model
-        # For now, just return success
-        return render_template('material_added_confirmation.html', subject=subject, title=title)
-    
-    subjects = [
-        ("Engineering Mathematics", "Engineering Mathematics"),
-        ("Statistics & Analytics", "Statistics & Analytics"),
-        ("IT Skills", "IT Skills"),
-        ("FEEE", "FEEE"),
-        ("PMS", "PMS")
-    ]
-    return render_template('instructor_add_study_material.html', subjects=subjects)
-
-@app.route('/instructor/add_announcement', methods=['GET', 'POST'])
-def add_announcement():
-    if 'instructor_id' not in session:
-        return redirect('/login')
-    
-    if request.method == 'POST':
-        title = request.form.get('title')
-        message = request.form.get('message')
-        
-        # You can store this in database if you have an Announcement model
-        # For now, just return success
-        return render_template('announcement_added_confirmation.html', title=title)
-    
-    return render_template('instructor_add_announcement.html')
-
-from random import sample
-@app.route('/instructor/generate_mcqs/<subject_slug>')
-def generate_mcqs(subject_slug):
-    subject = subject_slugs.get(subject_slug)
-    if not subject:
-        return "Invalid Subject"
-
-    # Check if MCQs already exist for this subject
-    existing = MCQ.query.filter_by(subject=subject).count()
-    if existing >= 30:
-        added_count = 0
-        final_count = existing
-    else:
-        added_count = len(sample_mcqs[subject])
-        for q in sample_mcqs[subject]:
-            new_mcq = MCQ(
-                subject=subject,
-                question=q['question'],
-                option1=q['options'][0],
-                option2=q['options'][1],
-                option3=q['options'][2],
-                option4=q['options'][3],
-                correct_answer=q['correct']
-            )
-            db.session.add(new_mcq)
-        db.session.commit()
-        final_count = existing + added_count
-    return render_template('mcq_added_confirmation.html', subject=subject, added_count=added_count, final_count=final_count)
 
 # Map slugs to proper subject names
 subject_slugs = {
@@ -1269,15 +579,8 @@ sample_mcqs = {
 }# end of sample_mcqs dictionary
 
 
-
-if __name__ == '__main__':
-    # when debug mode is enabled the reloader imports this module twice
-    # (once in the parent process and once in the child). only initialize
-    # the database in the *child* process where Werkzeug sets this
-    # environment variable. this avoids SQLITE "database is locked"
-    # errors that were occurring at startup.
-    if os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
-        init_db()
-
-    # start the server after any required setup
-    app.run(debug=True)    
+if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True)
+  

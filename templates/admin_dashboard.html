@@ -3,45 +3,52 @@
 <head>
 <title>Admin Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 
 body{
 margin:0;
-font-family:'Poppins',sans-serif;
+ font-family: 'Inter', sans-serif;
+    background-color: #f4f6f9;
 display:flex;
-background:#eef2f7;
+
 }
 
 /* SIDEBAR */
-
 aside{
-width:250px;
+width:240px;
 height:100vh;
-background:#24282c;
+background: linear-gradient(180deg,#1e293b,#020617);
 color:white;
 padding-top:20px;
 position:fixed;
 left:0;
 top:0;
+box-shadow: 4px 0 20px rgba(0,0,0,0.3);
 }
 
 aside h2{
 text-align:center;
-margin-bottom:40px;
-font-size:22px;
+margin-bottom:30px;
+font-size:20px;
+font-weight:700;
+letter-spacing:1px;
 }
 
 aside a{
 display:block;
-padding:15px 25px;
-color:white;
+padding:14px 25px;
+color:#cbd5f5;
 text-decoration:none;
 transition:0.3s;
+border-left:4px solid transparent;
 }
 
 aside a:hover{
-background:#003366;
+background:rgba(255,255,255,0.08);
+color:white;
+border-left:4px solid #6366f1;
+padding-left:30px;
 }
 
 /* MAIN CONTENT */
@@ -50,23 +57,31 @@ background:#003366;
 margin-left:250px;
 padding:40px;
 width:100%;
-background:#9dbfe8;
+background:#fbfafaf1;
 min-height:100vh;
 }
 
 .container{
-max-width:900px;
-margin:auto;
-background:#ffffff;
-padding:35px;
-border-radius:12px;
-box-shadow:0 8px 20px rgba(0,0,0,0.08);
+max-width: 1000px;
+margin: 40px auto;
+background: rgba(255,255,255,0.9);
+padding: 40px;
+border-radius: 18px;
+backdrop-filter: blur(10px);
+box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+transition: all 0.3s ease;
+}
+
+.container:hover{
+transform: translateY(-6px);
+box-shadow: 0 20px 50px rgba(0,0,0,0.15);
 }
 
 h2{
 text-align:center;
 margin-bottom:30px;
 font-size:26px;
+font-weight:600;
 }
 
 input, select{
@@ -78,24 +93,24 @@ border-radius:6px;
 font-size:14px;
 background:#f9fafb;
 }
-
-
 button{
 width:100%;
 padding:12px;
 margin-top:8px;
-background:#2952a3;
+background: linear-gradient(135deg,#6366f1,#4f46e5);
 color:white;
 border:none;
 cursor:pointer;
-font-size:16px;
-border-radius:6px;
+font-size:15px;
+border-radius:8px;
 transition:0.3s;
 }
 
 button:hover{
-background:#1f3f80;
+transform: translateY(-2px);
+box-shadow:0 8px 20px rgba(79,70,229,0.4);
 }
+
 
 hr{
 margin:30px 0;
@@ -127,28 +142,43 @@ table{
 width:100%;
 border-collapse:collapse;
 margin-top:20px;
+border-radius:10px;
+overflow:hidden;
 }
 
 table th{
-background:#1f2937;
+background: linear-gradient(135deg,#4f46e5,#6366f1);
 color:white;
 padding:12px;
+font-weight:600;
 }
 
 table td{
 padding:10px;
 text-align:center;
 border-bottom:1px solid #eee;
+background:white;
+}
+
+table tr:hover td{
+background:#f3f4f6;
 }
 
 /* BRANCH & SUBJECT LIST */
 
 .branch-box{
-background:#f9f9f9;
-padding:15px;
+background: #ffffff;
+padding:18px;
 margin-bottom:20px;
-border-radius:8px;
-border:1px solid #ddd;
+border-radius:12px;
+border:1px solid #e5e7eb;
+box-shadow:0 8px 20px rgba(0,0,0,0.05);
+transition:0.3s;
+}
+
+.branch-box:hover{
+transform: translateY(-4px);
+box-shadow:0 12px 30px rgba(0,0,0,0.1);
 }
 
 .branch-header{
@@ -201,44 +231,119 @@ gap:6px;
 }
 
 .btn{
-padding:5px 10px;
-border-radius:4px;
+padding:6px 12px;
+border-radius:6px;
 text-decoration:none;
 color:white;
-font-size:13px;
+font-size:12px;
 border:none;
 cursor:pointer;
+transition:0.3s;
 }
 
-.blue{background:#095ff4;}
-.view{background:#2196F3;}
-.green{background:#4CAF50;}
-.edit{background:#f39c12;}
-.delete{background:#e74c3c;}
-.delete-small{background:#e74c3c;padding:3px 6px;}
+.btn:hover{
+transform:scale(1.05);
+}
+
+.blue{background:#3b82f6;}
+.view{background:#06b6d4;}
+.green{background:#22c55e;}
+.edit{background:#f59e0b;}
+.delete{background:#ef4444;}
+.delete-small{background:#ef4444;padding:4px 8px;}
 
 .empty{
 color:gray;
 font-style:italic;
 }
 /* SMALL FORM STYLE */
+/* HEADER */
+.top-header {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 65px;
+
+background: linear-gradient(90deg, #6366f1, #4f46e5);
+color: white;
+
+padding: 0 40px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+
+z-index: 1000;
+
+/* smoother shadow */
+box-shadow: 0 6px 20px rgba(79, 70, 229, 0.3);
+}
+
+.top-header {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 65px;
+
+background: linear-gradient(90deg, #dbb1b1, #8a7676, #cbbcbc);
+color: white;
+
+padding: 0 40px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+
+z-index: 1000;
+
+/* smoother shadow */
+box-shadow: 0 6px 20px rgba(79, 70, 229, 0.3);
+}
+
+/* MAIN LAYOUT */
+.main-container {
+    display: flex;
+    margin-top: 70px; /* space for header */
+}
+
+/* SIDEBAR */
+aside {
+    width: 220px;
+    height: 100vh;
+    background: #34495e;
+    color: white;
+    padding: 20px;
+}
+
+/* CONTENT */
+.content {
+    flex: 1;
+    padding: 20px;
+}
 
 
 </style>
 </head>
 
 <body>
+    <div class="top-header">
+    <h2>🎓 DCET Admin Panel</h2>
+    <div>
+        <span>Welcome, Admin</span>
+        
+    </div>
+</div>
 
 <!-- SIDEBAR -->
 <aside>
 
 <h2>Admin Panel ⚙️</h2>
 
-<a href="/admin_dashboard">🏠 Dashboard</a>
-<a href="/admin_dashboard#branch">🌿 Manage Branches</a>
-<a href="/admin_dashboard#subject">📘 Manage Subjects</a>
-<a href="/admin_attendance">📊 MCQ Attendance</a>
-<a href="/logout" class="logout">🚪 Logout</a>
+<a href="{{ url_for('admin.dashboard') }}"><p>🏠 DASHBOARD</p></a>
+<a href="{{ url_for('admin.dashboard') }}#branch"><p>🌿 Manage Branches</p></a>
+<a href="{{ url_for('admin.dashboard') }}#subject"><p>📘 Manage Subjects</p></a>
+<a href="{{ url_for('admin.admin_attendance') }}"><p>📊 MCQ Attendance</p></a>
+<a href="{{ url_for('logout') }}" class="logout"><p>🚪 Logout</p></a>
 
 </aside>
 
@@ -247,6 +352,7 @@ font-style:italic;
 <div class="main">
 
 <div class="container">
+    
 
 <h2>Admin Dashboard</h2>
 
@@ -301,9 +407,9 @@ font-style:italic;
 
 <div class="branch-actions">
 
-<a href="/admin/edit-branch/{{ branch.id }}" class="btn edit">✏️ Edit</a>
+<a href="{{ url_for('admin.edit_branch', branch_id=branch.id) }}" class="btn edit">✏️ Edit</a>
 
-<form action="/admin/delete-branch/{{ branch.id }}" method="POST" style="display:inline;">
+<form action="{{ url_for('admin.delete_branch', branch_id=branch.id) }}" method="POST" style="display:inline;">
 <button type="submit" class="btn delete">🗑 Delete</button>
 </form>
 
@@ -327,7 +433,7 @@ font-style:italic;
 
 <a href="/admin/subject/{{ subject.id }}/materials" class="btn view">👁 View</a>
 
-<a href="{{ url_for('admin_attendance') }}" class="btn green">
+<a href="{{ url_for('admin.admin_attendance') }}" class="btn green">
 📊 MCQ Attendance
 </a>
 

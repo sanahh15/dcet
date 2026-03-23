@@ -38,6 +38,7 @@ Use the left side menu to manage the DCET Study Portal.
 </p>
 
 <div class="actions-box">
+    
     <h3>Instructor Actions</h3>
     <ul>
         <li>📝 Add MCQ Questions</li>
@@ -47,5 +48,24 @@ Use the left side menu to manage the DCET Study Portal.
         <li>📊 View Student Test Results</li>
     </ul>
 </div>
+
+
+
+
+
+
+{% for branch in branches %}
+
+<h4>{{ branch.name }}</h4>
+
+<ul>
+
+{% for subject in branch.subjects %}
+<li>{{ subject.name }}</li>
+{% endfor %}
+
+</ul>
+
+{% endfor %}
 
 {% endblock %}

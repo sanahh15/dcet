@@ -65,24 +65,28 @@
     }
 </style>
 
-<h2>📚 Upload Study Material</h2>
 
-<form method="POST">
-    <label for="subject">Select Subject:</label>
-    <select id="subject" name="subject" required>
-        <option value="">-- Choose a Subject --</option>
-        {% for value, label in subjects %}
-            <option value="{{ value }}">{{ label }}</option>
-        {% endfor %}
-    </select>
 
-    <label for="title">Material Title:</label>
-    <input type="text" id="title" name="title" placeholder="e.g., Chapter 5 - Calculus Basics" required>
+<h2>Upload Study Material - {{subject}}</h2>
 
-    <label for="content">Content/Notes:</label>
-    <textarea id="content" name="content" placeholder="Enter study material content here..." required></textarea>
+<form method="POST" enctype="multipart/form-data">
 
-    <button type="submit">📤 Upload Material</button>
+<label>Material Title</label>
+<input type="text" name="title">
+
+<label>Question / Topic</label>
+<input type="text" name="topic">
+
+<label>Explanation</label>
+<textarea name="explanation"></textarea>
+
+<label>Upload PDF</label>
+<input type="file" name="pdf_file">
+
+<button type="submit">Upload Material</button>
+
 </form>
+
+
 
 {% endblock %}

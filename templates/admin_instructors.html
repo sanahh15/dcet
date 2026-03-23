@@ -1,0 +1,29 @@
+<h2>Instructor Requests</h2>
+
+<table border="1">
+<tr>
+<th>Name</th>
+<th>Email</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+
+{% for instructor in instructors %}
+
+<tr>
+<td>{{ instructor.name }}</td>
+<td>{{ instructor.email }}</td>
+<td>{{ instructor.status }}</td>
+
+<td>
+{% if instructor.status == "pending" %}
+<a href="/approve_instructor/{{ instructor.id }}">Approve</a>
+{% else %}
+Approved
+{% endif %}
+</td>
+
+</tr>
+
+{% endfor %}
+</table>
