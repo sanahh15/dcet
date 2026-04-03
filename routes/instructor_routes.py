@@ -2,7 +2,7 @@ import os
 from random import sample
 from flask import Blueprint, render_template, request, redirect, session, flash, url_for
 from werkzeug.utils import secure_filename
-
+from utils import subject_slugs , sample_mcqs
 from extensions import db
 from models import Branch, Subject, Material, StudyMaterial, MCQ, TestResult
 
@@ -15,10 +15,16 @@ def dashboard():
         return redirect('/login')
     return render_template('instructor_dashboard.html')
 
-@instructor.route('/instructor/subject/<int:subject_id>/add-material', methods=['GET','POST'])
+@instructor.route('/debug_db')
+def debug_db():
+    all_q = MCQ.query.all()
+    return f"Total questions: {len(all_q)}"
+
+@instructor.route('/subject/<int:subject_id>/add-material', methods=['GET','POST'])
 def instructor_add_material(subject_id):
 
     subject = Subject.query.get_or_404(subject_id)
+    questions = MCQ.query.filter_by(subject=subject.name).limit(30).all()
 
     if request.method == 'POST':
 
@@ -44,12 +50,12 @@ def instructor_add_material(subject_id):
     return render_template('instructor_add_material.html', subject=subject)
 
 
-@instructor.route('/instructor/subjects')
+@instructor.route('/subjects')
 def instructor_subjects():
     return render_template("instructor_subjects.html")
 
 
-@instructor.route("/instructor/add-branch", methods=["POST"])
+@instructor.route("/add-branch", methods=["POST"])
 def instructor_add_branch():
     name = request.form["branch_name"]
 
@@ -59,7 +65,7 @@ def instructor_add_branch():
 
     return redirect("/instructor/dashboard")
 
-@instructor.route("/instructor/add-subject", methods=["POST"])
+@instructor.route("/add-subject", methods=["POST"])
 def instructor_add_subject():
     name = request.form["subject_name"]
     branch_id = request.form["branch_id"]
@@ -71,7 +77,7 @@ def instructor_add_subject():
 
     return redirect("/instructor/dashboard")
 
-@instructor.route('/instructor/logout')
+@instructor.route('/logout')
 def instructor_logout():
     session.pop('instructor_id', None)
     # logout should send them to the new login path as well
@@ -79,7 +85,7 @@ def instructor_logout():
 
 
 
-@instructor.route('/instructor/add_mcq')
+@instructor.route('/add_mcq')
 def select_subject_for_mcq():
 
     if 'instructor_id' not in session:
@@ -95,7 +101,7 @@ def select_subject_for_mcq():
 
     return render_template("select_subject.html", subjects=subjects)    
 
-@instructor.route('/instructor/add_mcq/<subject>', methods=['GET','POST'])
+@instructor.route('/add_mcq/<subject>', methods=['GET','POST'])
 def add_mcq(subject):
 
     if request.method == 'POST':
@@ -126,17 +132,17 @@ def add_mcq(subject):
 
 
 
-@instructor.route('/instructor/test_results')
+@instructor.route('/test_results')
 def instructor_test_results():
     # Fetch all test results, newest first
     results = TestResult.query.order_by(TestResult.date_taken.desc()).all()
     return render_template('instructor_test_results.html', results=results)
 
-@instructor.route('/instructor/generate_mcqs')
+@instructor.route('/generate_mcqs')
 def generate_mcqs_page():
     return render_template('generate_mcqs.html')
 
-@instructor.route('/instructor/add_study_material/<subject>', methods=['GET','POST'])
+@instructor.route('/add_study_material/<subject>', methods=['GET','POST'])
 def add_study_material(subject):
 
     if request.method == 'POST':
@@ -163,7 +169,7 @@ def add_study_material(subject):
 
     return render_template("add_study_material.html", subject=subject)
 
-@instructor.route('/instructor/add_announcement', methods=['GET', 'POST'])
+@instructor.route('/add_announcement', methods=['GET', 'POST'])
 def add_announcement():
     if 'instructor_id' not in session:
         return redirect('/login')
@@ -180,9 +186,11 @@ def add_announcement():
 
 from random import sample
 
-@instructor.route('/instructor/generate_mcqs/<subject_slug>')
+@instructor.route('/generate_mcqs/<subject_slug>')
 def generate_mcqs(subject_slug):
-    subject = subject_slugs.get(subject_slug)
+    subject = subject_slug
+    
+    print()
 
     if not subject:
         return "Invalid Subject"
@@ -196,17 +204,19 @@ def generate_mcqs(subject_slug):
     if existing >= 30:
         final_count = existing
     else:
-        mcq_list = sample_mcqs.get(subject, [])
+        real_subject = subject_slugs.get(subject_slug)
+        mcq_list = sample_mcqs[real_subject]
 
+        print("INSERTING:", len(mcq_list))
         for q in mcq_list:
             new_mcq = MCQ(
-                subject=subject,
+                 subject=subject_slug,
                 question=q['question'],
                 option1=q['options'][0],
                 option2=q['options'][1],
                 option3=q['options'][2],
                 option4=q['options'][3],
-                correct=q['correct']
+                correct_answer=q['correct']
             )
             db.session.add(new_mcq)
             added_count += 1

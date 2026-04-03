@@ -22,6 +22,8 @@ class MCQ(db.Model):
     option2 = db.Column(db.String(200))
     option3 = db.Column(db.String(200))
     option4 = db.Column(db.String(200))
+    correct_answer = db.Column(db.String(200))
+    
    
 
 class Subject(db.Model):

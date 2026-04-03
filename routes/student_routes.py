@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, request, redirect, session, url_fo
 
 from extensions import db
 from models import Question, Student, Branch, Subject, Material, DCETMaterial, MCQ, TestResult,DailyTarget
-
+from utils import subject_slugs , sample_mcqs
 
 student = Blueprint('student', __name__)
 
@@ -163,20 +163,22 @@ def student_dcet(material_id):
 def student_test(subject_slug):
 
     # Convert slug to actual subject name (simple formatting)
-    subject = subject_slug.replace("_", " ").title()
+    subject = subject_slug
 
 
     # Fetch 30 questions
     questions = MCQ.query.filter_by(subject=subject).limit(30).all()
 
+    print("Subject:", subject)
+    print("Count:", MCQ.query.filter_by(subject=subject).count())
     
     if request.method == 'POST':
         score = 0
         for q in questions:
             selected = request.form.get(str(q.id))
             #if selected == q.correct:
-        score += 1
-
+        if selected == q.correct:
+         score += 1
         result = TestResult(
             student_name=session.get('student_name', 'Student Name'),
             subject=subject,
